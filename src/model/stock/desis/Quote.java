@@ -1,14 +1,12 @@
 package model.stock.desis;
 import java.io.Serializable;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
 
 
 public class Quote implements Serializable {
 
-    private static TreeMap<String, Quote> newQuoteObjmap = new TreeMap<>();
-    private static TreeMap<String, Quote> Quotemap = new TreeMap<>(); 
-    
+    static  ArrayList<Quote> list=new ArrayList<Quote>();
+    private static ArrayList<Quote> newQuoteObjects=new ArrayList<Quote>();
 	private static final long serialVersionUID = 1L;
 	
 	private String stockName;
@@ -22,14 +20,14 @@ public class Quote implements Serializable {
 		this.bestBuyPrice=bestBuyPrice;
 		this.bestSellPrice=bestSellPrice;
 		
-		if(Quotemap.containsKey(stockName))
+		if(isPresent(this))
 		{
 			System.out.println(stockName+" stock is already present!");
 		}
 		else
 		{
-			newQuoteObjmap.put(stockName, this);
-			Quotemap.put(stockName, this);
+			list.add(this);
+			newQuoteObjects.add(this);
 		}
 	}
 	
@@ -59,62 +57,65 @@ public class Quote implements Serializable {
 	public void introduce(Quote obj) {
 		System.out.println("Stock Name: "+obj.stockName+ "\nBest Buy Price: "+obj.bestBuyPrice+ "\nBest Sell Price: "+obj.bestSellPrice+ "\n");
 	}
-
+    boolean isPresent(Quote obj) {
+		
+		for(Quote temp:list) {
+			if(temp.getStockname(temp).equals(obj.getStockname(obj)))
+				return true;
+		}
+		return false;
+	}
     //Static methods to serialise
 	public static void serialise() {
-		Serialisation.serialiseObject(newQuoteObjmap);
+		Serialisation.serialiseObject(newQuoteObjects);
 	}
 	public static void serialiseWholeList() {
-		Serialisation.serialiseObject(Quotemap);
+		Serialisation.serialiseObject(list);
 	}
 	//static method to print all available Quote Objects
 	public static void printStocks() {
-	
-			 for (Map.Entry<String, Quote> e : Quotemap.entrySet())
-			e.getValue().introduce(e.getValue());
+		for(Quote temp:list)
+			temp.introduce(temp);
 	}
 	//to find whether certain stock is present or not
     public static Quote findStock(String stockName) {
     	
-    	 if(Quotemap.containsKey(stockName)) {
-    		 return Quotemap.get(stockName);
-    	 }
+    	for(Quote obj:list) {
+    		if(obj.getStockname(obj).equals(stockName))
+    			return obj;
+    	}
     	return null;
     }
     //update Quote Object after placing order
-	public static void updatePriceAddOrder(String stockName, String direction,double val) {
+	public static void updatePrice(String stockName, String direction,double val) {
     	
-		Quote temp=findStock(stockName);
-		if(temp==null) {
-			throw new NullPointerException();
+    	
+		try
+		{   Quote temp=findStock(stockName);
+			if(temp.getStockname(temp).equals(stockName)) {
+				if(direction.equals("Buy")) {
+		    		if(temp.getBestBuyPrice(temp)==0 || temp.getBestBuyPrice(temp)<val)
+		    		{
+		    			temp.setBestBuyPrice(temp, val);
+		    			
+		    		}
+		    			
+		    	}
+		    	else if(direction.equals("Sell")){
+		    		if(temp.getBestSellPrice(temp)==0 || temp.getBestBuyPrice(temp)>val)
+		    			{temp.setBestSellPrice(temp, val);
+		    		
+		    		}
+		    	}
+			}
+		}catch(NullPointerException e) {
+			System.out.println("NullPointerException thrown!");
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
-		else if(direction.equals("Buy") && (temp.getBestBuyPrice(temp)==0 || temp.getBestBuyPrice(temp)<val))
-			temp.setBestBuyPrice(temp, val);
-		else if(direction.equals("Sell") && (temp.getBestSellPrice(temp)==0 || temp.getBestBuyPrice(temp)>val))
-			temp.setBestSellPrice(temp, val);
-    	
-    }
-	//method to update price on removal of object
-    public static void updatePrice(String stockName, String direction,double val) {
-    	
-    	try {
-		Quote temp=findStock(stockName);
-		if(direction.equals("Buy"))
-			temp.setBestBuyPrice(temp, val);
-		else if(direction.equals("Sell") )
-			temp.setBestSellPrice(temp, val);
-    	}catch(NullPointerException e) {
-    		e.getMessage();
-    	}
-    	catch(Exception e) {
-    		e.printStackTrace();
-    	}
     	
     }
 	
-    //default method
-	static void makeQuotemap(Quote obj) {
-		Quote.Quotemap.put(obj.getStockname(obj),obj);
-	}
+	
 
 }
