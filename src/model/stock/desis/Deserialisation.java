@@ -15,13 +15,14 @@ public abstract class Deserialisation {
 			while((fin.available())!=0) {
 				
 				Quote obj=(Quote)in.readObject();
-				Quote.list.add(obj);	
+				Quote.makeQuotemap(obj);
+					
 			}
 		    in.close();
 	    fin.close();
 		     
 		}catch(EOFException e) {
-			//This isn't problem
+			e.getMessage();
 		}catch (FileNotFoundException e) {
 			
 			e.getMessage();
